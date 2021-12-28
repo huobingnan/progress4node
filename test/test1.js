@@ -7,12 +7,29 @@ const p = new Progress({
   width: 50,
 });
 
-let id;
-id = setInterval(() => {
-  if (p.done) {
-    console.log("done");
-    clearInterval(id);
-    return;
-  }
-  p.tick(2);
-}, 100);
+new Promise((resolve) => {
+  let id;
+  id = setInterval(() => {
+    if (p.done) {
+      console.log("done");
+      clearInterval(id);
+      resolve();
+      return;
+    }
+    p.tick(~~(Math.random() * 10));
+  }, 50);
+}).then(() => {
+  p.reset({
+    value: 0,
+    total: 100,
+  });
+  let id;
+  id = setInterval(() => {
+    if (p.done) {
+      console.log("done");
+      clearInterval(id);
+      return;
+    }
+    p.tick();
+  });
+});

@@ -12,8 +12,9 @@ export declare interface ProgressOptions {
 export declare class Progress {
   constructor(params?: ProgressOptions);
   tick(times?: number): void;
-  render(): void;
+  reset(params: ProgressOptions): void;
   get done(): boolean;
   get value(): number;
   get total(): number;
+  get width(): number;
 }

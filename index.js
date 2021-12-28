@@ -18,54 +18,64 @@ class Progress {
     clearConsole: false,
   };
 
-  previousProgressValue = 0;
+  $$previousProgressWidth = 0;
 
   constructor(params) {
     this.options = Object.assign(this.options, params);
-    this.render();
+    this._render = this._renderItr();
+    this.tick(0);
   }
 
-  render() {
-    if (this.options.value === this.options.total) {
-      this.previousProgressValue = 0;
-    }
-    if (this.options.value > this.options.total) {
-      return;
-    }
-    const progress = this.options.value / this.options.total;
-    const progressValue = (progress * 100).toFixed(0);
-    if (progressValue === this.previousProgressValue) {
-      return;
-    } else {
-      this.previousProgressValue = progressValue;
-    }
-
-    const progressWidth = Math.ceil(progress * this.options.width);
-    const symbols = new Array(this.options.width);
-    for (let i = 0; i < progressWidth; ++i) {
-      symbols.push(chalk.hex(this.options.color)(this.options.completedSymbol));
-    }
-    for (let i = 0; i < this.options.width - progressWidth; ++i) {
-      symbols.push(this.options.uncompletedSymbol);
-    }
-    if (this.options.clearConsole) {
-      console.clear();
-    }
-    process.stdout.write(
-      `\r${this.options.title} ${symbols.join("")} ${progressValue}% [${
-        this.options.value
-      } / ${this.options.total}]`
+  *_renderItr() {
+    const progressBar = new Array(this.options.width).fill(
+      this.options.uncompletedSymbol
     );
+    this.$$previousProgressWidth = 0;
+    for (;;) {
+      if (this.options.value > this.options.total) break;
+
+      const progressValue = this.options.value / this.options.total;
+      const progressWidth = Math.ceil(progressValue * this.options.width);
+      // fill completed symbol
+      for (let i = this.$$previousProgressWidth; i < progressWidth; ++i) {
+        progressBar[i] = chalk.hex(this.options.color)(
+          this.options.completedSymbol
+        );
+      }
+      if (this.options.clearConsole) {
+        console.clear();
+      }
+      // write to console
+      const title = this.options.title;
+      const pvalue = Math.ceil(progressValue * 100);
+      const v = this.options.value;
+      const t = this.options.total;
+      process.stdout.write(
+        `\r${title} ${progressBar.join("")} ${pvalue}% [${v} / ${t}]`
+      );
+      this.$$previousProgressWidth = progressWidth;
+      yield;
+    }
   }
 
   tick(times = 1) {
-    if (this.done) return;
+    if (this.done) {
+      // destory generator
+      this._render.return();
+      return;
+    }
     if (this.options.value + times > this.options.total) {
       this.options.value = this.options.total;
     } else {
       this.options.value += times;
     }
-    this.render();
+    this._render.next();
+  }
+
+  reset(params) {
+    this.options = Object.assign(this.options, params);
+    this._render = this._renderItr();
+    this.tick(0);
   }
 
   get done() {
@@ -78,6 +88,10 @@ class Progress {
 
   get total() {
     return this.options.total;
+  }
+
+  get width() {
+    return this.options.width;
   }
 }
 
