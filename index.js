@@ -59,7 +59,12 @@ class Progress {
   }
 
   tick(times = 1) {
-    this.options.value += times;
+    if (this.done) return;
+    if (this.options.value + times > this.options.total) {
+      this.options.value = this.options.total;
+    } else {
+      this.options.value += times;
+    }
     this.render();
   }
 
