@@ -1,0 +1,26 @@
+{
+  "name": "progress4node",
+  "version": "0.0.1",
+  "description": "a terminal progress bar display tools for nodejs",
+  "main": "index.js",
+  "type": "module",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "keywords": [
+    "cli",
+    "progress",
+    "terminal"
+  ],
+  "scripts": {},
+  "author": "huobn",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^9.1.3"
+  }
+}
